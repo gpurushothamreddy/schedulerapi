@@ -1,0 +1,11 @@
+#!/bin/sh
+set -u
+
+# This file should only be executed locally
+
+BINARY=$GOPATH/bin/scheduleapi
+CMDPATH=github.com/schedulerapi/cmd
+
+
+ CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o "$BINARY" "$CMDPATH"  && "$BINARY" \
+  "$@"

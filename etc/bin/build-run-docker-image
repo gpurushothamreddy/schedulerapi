@@ -1,0 +1,14 @@
+#!/bin/sh
+
+mkdir -p Dockertmp
+
+cp -R $GOPATH/bin/scheduleapi Dockertmp/
+cp -R deploy/* Dockertmp/
+
+cd Dockertmp
+
+docker build -f Dockerfile -t "scheduleapi:latest" .
+cd ..
+
+rm -rf Dockertmp
+docker run -it -p 8888:8888 scheduleapi

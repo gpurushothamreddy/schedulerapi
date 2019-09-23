@@ -1,0 +1,41 @@
+#!/bin/bash
+
+echo PWD: $(pwd)
+
+set -e
+
+[[ -n $GOPATH ]] || GOPATH=$(pwd)
+export GOPATH
+
+PATH=$GOPATH/bin:$PATH
+
+cd "$(dirname "${BASH_SOURCE[0]}")/../.." || exit 1
+
+go version
+go env
+
+PKG_LIST=$(go list ./... | grep -v /vendor| grep -v /fixtures| grep -v /dto| grep -v /domain| grep -v fakes)
+
+rm -rf coverage_results
+
+mkdir coverage_results
+
+run_test() {
+    go test -covermode=count -coverprofile "coverage_results/${package##*/}.cov" -p 1 "$package" $BENCH;
+}
+
+# Create a coverage file and execute tests for each package
+for package in ${PKG_LIST}; do
+    run_test 
+done ;
+
+# unify coverage into one file
+echo 'mode: count' > coverage_results/coverage.out
+tail -q -n +2 coverage_results/*.cov >> coverage_results/coverage.out
+
+# display global coverage
+go tool cover -func=coverage_results/coverage.out
+
+# generate html
+go tool cover -html=coverage_results/coverage.out -o coverage.html
+

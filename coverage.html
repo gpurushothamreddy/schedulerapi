@@ -1,0 +1,848 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/schedulerapi/httpserver/endpoint.go (100.0%)</option>
+				
+				<option value="file1">github.com/schedulerapi/httpserver/healthcheck_endpoint_builder.go (0.0%)</option>
+				
+				<option value="file2">github.com/schedulerapi/httpserver/healthcheck_handler.go (0.0%)</option>
+				
+				<option value="file3">github.com/schedulerapi/httpserver/router.go (100.0%)</option>
+				
+				<option value="file4">github.com/schedulerapi/httpserver/schedule_endpoint_builder.go (100.0%)</option>
+				
+				<option value="file5">github.com/schedulerapi/httpserver/scheduler_handler.go (84.0%)</option>
+				
+				<option value="file6">github.com/schedulerapi/scheduler/scheduler.go (40.8%)</option>
+				
+				<option value="file7">github.com/schedulerapi/scheduler/store.go (84.8%)</option>
+				
+				<option value="file8">github.com/schedulerapi/scheduler/task/mock.go (66.7%)</option>
+				
+				<option value="file9">github.com/schedulerapi/scheduler/task/registry.go (87.1%)</option>
+				
+				<option value="file10">github.com/schedulerapi/scheduler/task/task.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package httpserver
+
+import (
+        "net/http"
+)
+
+// Endpoint to configure endpoint
+type Endpoint struct {
+        handler http.Handler
+}
+
+func (e Endpoint) Handler() http.Handler <span class="cov10" title="3">{ return e.handler }</span>
+
+func NewEndpoint(handler http.Handler) Endpoint <span class="cov10" title="3">{
+        return Endpoint{
+                handler: handler,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package httpserver
+
+// NewHealthCheckEndpointBuilder to setting up a new health check endpoint
+func NewHealthCheckEndpointBuilder() EndpointBuilder <span class="cov0" title="0">{
+        return &amp;getHealthCheckEndpointBuilder{}
+}</span>
+
+type getHealthCheckEndpointBuilder struct {
+}
+
+// Build the endpoint
+func (builder *getHealthCheckEndpointBuilder) Build() Endpoint <span class="cov0" title="0">{
+
+        handler := NewHealthcheckHandler()
+
+        return NewEndpoint(
+                handler,
+        )
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package httpserver
+
+import (
+        "encoding/json"
+        "net/http"
+)
+
+type gethealthcheckHandler struct{}
+
+// NewHealthcheckHandler for health check endpoint
+func NewHealthcheckHandler() http.Handler <span class="cov0" title="0">{
+        return &amp;gethealthcheckHandler{}
+}</span>
+
+//HealthcheckHandler
+func (h *gethealthcheckHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        json.NewEncoder(w).Encode(`{"status":"ok"}`)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package httpserver
+
+import (
+        "net/http"
+
+        "github.com/bmizerany/pat"
+)
+
+// NewRouter build the router
+func NewRouter(
+        scheduleEndpoint Endpoint,
+        healthCheckEndpoint Endpoint,
+) http.Handler <span class="cov8" title="1">{
+        patternServeMux := pat.New()
+
+        patternServeMux.Post(schedulePath, scheduleEndpoint.Handler())
+        patternServeMux.Get(healthCheckPath, healthCheckEndpoint.Handler())
+
+        return patternServeMux
+}</span>
+
+const schedulePath = "/schedule"
+const healthCheckPath = "/status/basic"
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package httpserver
+
+import (
+        "github.com/schedulerapi/scheduler"
+)
+
+// NewGetReviewEndpointBuilder setting up a new review summary endpoint
+func NewSchedulerEndpointBuilder(
+        scheduler *scheduler.Scheduler,
+) EndpointBuilder <span class="cov8" title="1">{
+        return &amp;getSchedulerEndpointBuilder{
+                scheduler: scheduler,
+        }
+}</span>
+
+type getSchedulerEndpointBuilder struct {
+        scheduler *scheduler.Scheduler
+}
+
+func (builder *getSchedulerEndpointBuilder) Build() Endpoint <span class="cov8" title="1">{
+
+        handler := NewScheduleHandler(builder.scheduler)
+
+        return NewEndpoint(
+                handler,
+        )
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package httpserver
+
+import (
+        "encoding/json"
+        "log"
+        "net/http"
+        "os/exec"
+        "time"
+
+        "github.com/schedulerapi/scheduler"
+)
+
+type getSchedulerHandler struct {
+        scheduler *scheduler.Scheduler
+}
+
+// NewScheduleHandler to configure Schedule endpoint
+func NewScheduleHandler(scheduler *scheduler.Scheduler) http.Handler <span class="cov10" title="5">{
+        return &amp;getSchedulerHandler{scheduler}
+}</span>
+
+func (h *getSchedulerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) <span class="cov7" title="3">{
+        var schedule ScheduleInput
+        defer r.Body.Close()
+        decoder := json.NewDecoder(r.Body)
+        err := decoder.Decode(&amp;schedule)
+        if err != nil || schedule.Command == "" || schedule.ScheduleDateTime == "" </span><span class="cov1" title="1">{
+                w.WriteHeader(http.StatusBadRequest)
+                w.Header().Set("Content-Type", "application/json")
+                json.NewEncoder(w).Encode(ErrorMessage{ErrorCode: "INVALID_BODY", Message: "Invalid body"})
+                return
+        }</span>
+
+        <span class="cov4" title="2">pst, _ := time.LoadLocation("America/Los_Angeles")
+        var longForm = "2006-01-02 15:04:05 PST"
+        s, err := time.ParseInLocation(longForm, schedule.ScheduleDateTime, pst)
+
+        if err != nil || s.Before(time.Now()) </span><span class="cov1" title="1">{
+                w.WriteHeader(http.StatusBadRequest)
+                w.Header().Set("Content-Type", "application/json")
+                json.NewEncoder(w).Encode(ErrorMessage{ErrorCode: "INVALID_BODY", Message: "Invalid body"})
+                return
+        }</span>
+        <span class="cov1" title="1">h.scheduler.RunAt(s, TaskWithArgs, schedule.Command)
+        w.WriteHeader(http.StatusCreated)
+        w.Header().Set("Content-Type", "application/json")</span>
+}
+
+// TaskWithArgs to execute given bash command
+func TaskWithArgs(script string) <span class="cov0" title="0">{
+        out, _ := exec.Command("sh", "-c", script).Output()
+        output := string(out[:])
+        log.Println(output)
+        log.Println("Task executed successfully")
+}</span>
+
+// ScheduleInput struct used to deserialize request body
+type ScheduleInput struct {
+        Command          string `json:"command"`
+        ScheduleDateTime string `json:"scheduleDateTime"`
+}
+
+// ErrorMessage to write error message in response body
+type ErrorMessage struct {
+        ErrorCode string `json:"errorCode"`
+        Message   string `json:"message"`
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package scheduler
+
+import (
+        "fmt"
+        "log"
+        "time"
+
+        "github.com/schedulerapi/scheduler/storage"
+        "github.com/schedulerapi/scheduler/task"
+)
+
+// Scheduler is used to schedule tasks. It holds information about those tasks
+// including metadata such as argument types and schedule times
+type Scheduler struct {
+        funcRegistry *task.FuncRegistry
+        tasks        map[task.ID]*task.Task
+        taskStore    storeBridge
+}
+
+// New will return a new instance of the Scheduler struct.
+func New(store storage.TaskStore) Scheduler <span class="cov8" title="3">{
+        funcRegistry := task.NewFuncRegistry()
+        return Scheduler{
+                funcRegistry: funcRegistry,
+                tasks:        make(map[task.ID]*task.Task),
+                taskStore: storeBridge{
+                        store:        store,
+                        funcRegistry: funcRegistry,
+                },
+        }
+}</span>
+
+// RunAt will schedule function to be executed once at the given time.
+func (scheduler *Scheduler) RunAt(time time.Time, function task.Function, params ...task.Param) (task.ID, error) <span class="cov8" title="3">{
+        funcMeta, err := scheduler.funcRegistry.Add(function)
+        if err != nil </span><span class="cov1" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov5" title="2">task := task.New(funcMeta, params)
+        task.IsRecurring = false
+
+        task.NextRun = time
+
+        scheduler.registerTask(task)
+        serr := scheduler.taskStore.Add(task)
+        if serr != nil </span><span class="cov0" title="0">{
+                scheduler.funcRegistry.Remove(task.Func.Name)
+                return "", serr
+        }</span>
+
+        <span class="cov5" title="2">return task.Hash(), nil</span>
+}
+
+// RunEvery will schedule function to be executed every time the duration has elapsed.
+func (scheduler *Scheduler) RunEvery(duration time.Duration, function task.Function, params ...task.Param) (task.ID, error) <span class="cov8" title="3">{
+        funcMeta, err := scheduler.funcRegistry.Add(function)
+        if err != nil </span><span class="cov1" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov5" title="2">task := task.New(funcMeta, params)
+
+        task.IsRecurring = true
+        task.Duration = duration
+        task.NextRun = time.Now().Add(duration)
+
+        scheduler.registerTask(task)
+        return task.Hash(), nil</span>
+}
+
+// Start will run the scheduler's timer and will trigger the execution
+// of tasks depending on their schedule.
+func (scheduler *Scheduler) Start() error <span class="cov0" title="0">{
+
+        // Populate tasks from storage
+        if err := scheduler.populateTasks(); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">scheduler.runPending()
+
+        go func(scheduler *Scheduler) </span><span class="cov0" title="0">{
+                for range time.Tick(time.Duration(1) * time.Second) </span><span class="cov0" title="0">{
+                        scheduler.runPending()
+                }</span>
+        }(scheduler)
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Stop will put the scheduler to halt
+func (scheduler *Scheduler) Stop() <span class="cov0" title="0">{
+        scheduler.taskStore.store.Close()
+}</span>
+
+// Cancel is used to cancel the planned execution of a specific task using it's ID.
+// The ID is returned when the task was scheduled using RunAt, RunAfter or RunEvery
+func (scheduler *Scheduler) Cancel(taskID task.ID) error <span class="cov0" title="0">{
+        task, found := scheduler.tasks[taskID]
+        if !found </span><span class="cov0" title="0">{
+                return fmt.Errorf("Task not found")
+        }</span>
+
+        <span class="cov0" title="0">_ = scheduler.taskStore.Remove(task)
+        delete(scheduler.tasks, taskID)
+        return nil</span>
+}
+
+// Clear will cancel the execution and clear all registered tasks.
+func (scheduler *Scheduler) Clear() <span class="cov0" title="0">{
+        for taskID, currentTask := range scheduler.tasks </span><span class="cov0" title="0">{
+                _ = scheduler.taskStore.Remove(currentTask)
+                delete(scheduler.tasks, taskID)
+        }</span>
+        <span class="cov0" title="0">scheduler.funcRegistry = task.NewFuncRegistry()</span>
+}
+
+func (scheduler *Scheduler) populateTasks() error <span class="cov0" title="0">{
+        tasks, err := scheduler.taskStore.Fetch()
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">for _, dbTask := range tasks </span><span class="cov0" title="0">{
+
+                // If we can't find the function, it's been changed/removed by user
+                exists := scheduler.funcRegistry.Exists(dbTask.Func.Name)
+
+                if !exists </span><span class="cov0" title="0">{
+                        log.Printf("%s was not found, it will be removed\n", dbTask.Func.Name)
+                        _ = scheduler.taskStore.Remove(dbTask)
+                        continue</span>
+                }
+
+                // If the task instance is still registered with the same computed hash then move on.
+                // Otherwise, one of the attributes changed and therefore, the task instance should
+                // be added to the list of tasks to be executed with the stored params
+                <span class="cov0" title="0">registeredTask, ok := scheduler.tasks[dbTask.Hash()]
+                if !ok </span><span class="cov0" title="0">{
+                        log.Printf("Detected a change in attributes of one of the instances of task %s, \n",
+                                dbTask.Func.Name)
+                        dbTask.Func, _ = scheduler.funcRegistry.Get(dbTask.Func.Name)
+                        registeredTask = dbTask
+                        scheduler.tasks[dbTask.Hash()] = registeredTask
+                }</span>
+
+                // Skip task which is not a recurring one and the NextRun has already passed
+                <span class="cov0" title="0">if !dbTask.IsRecurring &amp;&amp; dbTask.NextRun.Before(time.Now()) </span><span class="cov0" title="0">{
+                        // We might have a task instance which was executed already.
+                        // In this case, delete it.
+
+                        _ = scheduler.taskStore.Remove(dbTask)
+                        delete(scheduler.tasks, dbTask.Hash())
+                        continue</span>
+                }
+
+                // Duration may have changed for recurring tasks
+                <span class="cov0" title="0">if dbTask.IsRecurring &amp;&amp; registeredTask.Duration != dbTask.Duration </span><span class="cov0" title="0">{
+                        // Reschedule NextRun based on dbTask.LastRun + registeredTask.Duration
+                        registeredTask.NextRun = dbTask.LastRun.Add(registeredTask.Duration)
+                }</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (scheduler *Scheduler) runPending() <span class="cov5" title="2">{
+        for _, task := range scheduler.tasks </span><span class="cov5" title="2">{
+                if task.IsDue() </span><span class="cov5" title="2">{
+                        go task.Run()
+
+                        if !task.IsRecurring </span><span class="cov1" title="1">{
+                                _ = scheduler.taskStore.Remove(task)
+                                delete(scheduler.tasks, task.Hash())
+                        }</span>
+                }
+        }
+}
+
+func (scheduler *Scheduler) registerTask(task *task.Task) <span class="cov10" title="4">{
+        _, _ = scheduler.funcRegistry.Add(task.Func)
+        scheduler.tasks[task.Hash()] = task
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package scheduler
+
+import (
+        "encoding/json"
+        "reflect"
+        "strconv"
+        "strings"
+        "time"
+
+        "github.com/schedulerapi/scheduler/storage"
+        "github.com/schedulerapi/scheduler/task"
+)
+
+type storeBridge struct {
+        store        storage.TaskStore
+        funcRegistry *task.FuncRegistry
+}
+
+func (sb *storeBridge) Add(task *task.Task) error <span class="cov8" title="8">{
+        attributes, err := sb.getTaskAttributes(task)
+        if err != nil </span><span class="cov1" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="7">return sb.store.Add(attributes)</span>
+}
+
+func (sb *storeBridge) Fetch() ([]*task.Task, error) <span class="cov3" title="2">{
+        storedTasks, err := sb.store.Fetch()
+        if err != nil </span><span class="cov0" title="0">{
+                return []*task.Task{}, err
+        }</span>
+        <span class="cov3" title="2">var tasks []*task.Task
+        for _, storedTask := range storedTasks </span><span class="cov3" title="2">{
+                lastRun, err := time.Parse(time.RFC3339, storedTask.LastRun)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov3" title="2">nextRun, err := time.Parse(time.RFC3339, storedTask.NextRun)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov3" title="2">duration, err := time.ParseDuration(storedTask.Duration)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov3" title="2">isRecurring, err := strconv.Atoi(storedTask.IsRecurring)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov3" title="2">funcMeta, err := sb.funcRegistry.Get(storedTask.Name)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov3" title="2">params, err := paramsFromString(funcMeta, storedTask.Params)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov3" title="2">t := task.NewWithSchedule(funcMeta, params, task.Schedule{
+                        IsRecurring: isRecurring == 1,
+                        Duration:    time.Duration(duration),
+                        LastRun:     lastRun,
+                        NextRun:     nextRun,
+                })
+                tasks = append(tasks, t)</span>
+        }
+        <span class="cov3" title="2">return tasks, nil</span>
+}
+
+func (sb *storeBridge) Remove(task *task.Task) error <span class="cov5" title="3">{
+        attributes, err := sb.getTaskAttributes(task)
+        if err != nil </span><span class="cov1" title="1">{
+                return err
+        }</span>
+        <span class="cov3" title="2">return sb.store.Remove(attributes)</span>
+}
+
+func (sb *storeBridge) getTaskAttributes(task *task.Task) (storage.TaskAttributes, error) <span class="cov10" title="11">{
+        params, err := paramsToString(task.Params)
+        if err != nil </span><span class="cov3" title="2">{
+                return storage.TaskAttributes{}, err
+        }</span>
+
+        <span class="cov9" title="9">isRecurring := 0
+        if task.IsRecurring </span><span class="cov1" title="1">{
+                isRecurring = 1
+        }</span>
+
+        <span class="cov9" title="9">return storage.TaskAttributes{
+                Hash:        string(task.Hash()),
+                Name:        task.Func.Name,
+                LastRun:     task.LastRun.Format(time.RFC3339),
+                NextRun:     task.NextRun.Format(time.RFC3339),
+                Duration:    task.Duration.String(),
+                IsRecurring: strconv.Itoa(isRecurring),
+                Params:      params,
+        }, nil</span>
+}
+
+func paramsToString(params []task.Param) (string, error) <span class="cov10" title="11">{
+        var paramsList []string
+        for _, param := range params </span><span class="cov9" title="10">{
+                paramStr, err := json.Marshal(param)
+                if err != nil </span><span class="cov3" title="2">{
+                        return "", err
+                }</span>
+                <span class="cov8" title="8">paramsList = append(paramsList, string(paramStr))</span>
+        }
+        <span class="cov9" title="9">data, err := json.Marshal(paramsList)
+        return string(data), err</span>
+}
+
+func paramsFromString(funcMeta task.FunctionMeta, payload string) ([]task.Param, error) <span class="cov3" title="2">{
+        var params []task.Param
+        if strings.TrimSpace(payload) == "" </span><span class="cov0" title="0">{
+                return params, nil
+        }</span>
+        <span class="cov3" title="2">paramTypes := funcMeta.Params()
+        var paramsStrings []string
+        err := json.Unmarshal([]byte(payload), &amp;paramsStrings)
+        if err != nil </span><span class="cov0" title="0">{
+                return params, err
+        }</span>
+        <span class="cov3" title="2">for i, paramStr := range paramsStrings </span><span class="cov3" title="2">{
+                paramType := paramTypes[i]
+                target := reflect.New(paramType)
+                err := json.Unmarshal([]byte(paramStr), target.Interface())
+                if err != nil </span><span class="cov0" title="0">{
+                        return params, err
+                }</span>
+                <span class="cov3" title="2">param := reflect.Indirect(target).Interface().(task.Param)
+                params = append(params, param)</span>
+        }
+
+        <span class="cov3" title="2">return params, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package task
+
+import "github.com/stretchr/testify/mock"
+
+// CallbackMock is used for testing Task
+type CallbackMock struct {
+        mock.Mock
+}
+
+// CallNoArgs is a dummy function which accepts no arguments
+func (m *CallbackMock) CallNoArgs() <span class="cov10" title="2">{
+        m.Called()
+}</span>
+
+// CallWithArgs is a dummy function which accepts two arguments
+func (m *CallbackMock) CallWithArgs(arg1 string, arg2 bool) <span class="cov1" title="1">{
+        m.Called(arg1, arg2)
+}</span>
+
+// CallWithChan is a dummy function to test failure with non-hashable parameters
+func (m *CallbackMock) CallWithChan(channel chan bool) <span class="cov0" title="0">{
+        m.Called(channel)
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package task
+
+import (
+        "fmt"
+        "reflect"
+
+        "github.com/google/uuid"
+)
+
+// Function is a pointer to the callback function
+type Function interface{}
+
+// Param represents a single function parameter
+type Param interface{}
+
+// FunctionMeta holds information about function such as name and parameters.
+type FunctionMeta struct {
+        Name     string
+        function Function
+        params   map[string]reflect.Type
+}
+
+// FuncRegistry holds the list of all registered task functions.
+type FuncRegistry struct {
+        funcs map[string]FunctionMeta
+}
+
+// NewFuncRegistry will return an instance of the FuncRegistry.
+func NewFuncRegistry() *FuncRegistry <span class="cov9" title="11">{
+        return &amp;FuncRegistry{
+                funcs: make(map[string]FunctionMeta),
+        }
+}</span>
+
+// Add appends the function to the registry after resolving specific information about this function.
+func (reg *FuncRegistry) Add(function Function) (FunctionMeta, error) <span class="cov10" title="14">{
+        funcValue := reflect.ValueOf(function)
+        if funcValue.Kind() != reflect.Func </span><span class="cov1" title="1">{
+                return FunctionMeta{}, fmt.Errorf("Provided function value is not an actual function")
+        }</span>
+
+        <span class="cov9" title="13">name := uuid.New().String()
+        funcInstance, err := reg.Get(name)
+        if err == nil </span><span class="cov0" title="0">{
+                return funcInstance, nil
+        }</span>
+        <span class="cov9" title="13">reg.funcs[name] = FunctionMeta{
+                Name:     name,
+                function: function,
+                params:   reg.resolveParamTypes(function),
+        }
+        return reg.funcs[name], nil</span>
+}
+
+func (reg *FuncRegistry) Remove(name string) <span class="cov0" title="0">{
+        delete(reg.funcs, name)
+}</span>
+
+// Get returns the FunctionMeta instance which holds all information about any single registered task function.
+func (reg *FuncRegistry) Get(name string) (FunctionMeta, error) <span class="cov9" title="13">{
+        function, ok := reg.funcs[name]
+        if ok </span><span class="cov0" title="0">{
+                return function, nil
+        }</span>
+        <span class="cov9" title="13">return FunctionMeta{}, fmt.Errorf("Function %s not found", name)</span>
+}
+
+// Exists checks if a function with provided name exists.
+func (reg *FuncRegistry) Exists(name string) bool <span class="cov1" title="1">{
+        _, ok := reg.funcs[name]
+        if ok </span><span class="cov0" title="0">{
+                return true
+        }</span>
+        <span class="cov1" title="1">return false</span>
+}
+
+// Params returns the list of parameter types
+func (meta *FunctionMeta) Params() []reflect.Type <span class="cov1" title="1">{
+        funcType := reflect.TypeOf(meta.function)
+        paramTypes := make([]reflect.Type, funcType.NumIn())
+        for idx := 0; idx &lt; funcType.NumIn(); idx++ </span><span class="cov3" title="2">{
+                in := funcType.In(idx)
+                paramTypes[idx] = in
+        }</span>
+        <span class="cov1" title="1">return paramTypes</span>
+}
+
+func (reg *FuncRegistry) resolveParamTypes(function Function) map[string]reflect.Type <span class="cov9" title="13">{
+        paramTypes := make(map[string]reflect.Type)
+        funcType := reflect.TypeOf(function)
+        for idx := 0; idx &lt; funcType.NumIn(); idx++ </span><span class="cov9" title="12">{
+                in := funcType.In(idx)
+                paramTypes[in.Name()] = in
+        }</span>
+        <span class="cov9" title="13">return paramTypes</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package task
+
+import (
+        "crypto/sha1"
+        "fmt"
+        "io"
+        "reflect"
+        "time"
+)
+
+// ID is returned upon scheduling a task to be executed
+type ID string
+
+// Schedule holds information about the execution times of a specific task
+type Schedule struct {
+        IsRecurring bool
+        LastRun     time.Time
+        NextRun     time.Time
+        Duration    time.Duration
+}
+
+// Task holds information about task
+type Task struct {
+        Schedule
+        Func   FunctionMeta
+        Params []Param
+}
+
+// New returns an instance of task
+func New(function FunctionMeta, params []Param) *Task <span class="cov10" title="4">{
+        return &amp;Task{
+                Func:   function,
+                Params: params,
+        }
+}</span>
+
+// NewWithSchedule creates an instance of task with the provided schedule information
+func NewWithSchedule(function FunctionMeta, params []Param, schedule Schedule) *Task <span class="cov1" title="1">{
+        return &amp;Task{
+                Func:     function,
+                Params:   params,
+                Schedule: schedule,
+        }
+}</span>
+
+// IsDue returns a boolean indicating whether the task should execute or not
+func (task *Task) IsDue() bool <span class="cov8" title="3">{
+        timeNow := time.Now()
+        return timeNow == task.NextRun || timeNow.After(task.NextRun)
+}</span>
+
+// Run will execute the task and schedule it's next run.
+func (task *Task) Run() <span class="cov8" title="3">{
+        // Reschedule task first to prevent running the task
+        // again in case the execution time takes more than the
+        // task's duration value.
+        task.scheduleNextRun()
+
+        function := reflect.ValueOf(task.Func.function)
+        params := make([]reflect.Value, len(task.Params))
+        for i, param := range task.Params </span><span class="cov5" title="2">{
+                params[i] = reflect.ValueOf(param)
+        }</span>
+        <span class="cov8" title="3">function.Call(params)</span>
+}
+
+// Hash will return the SHA1 representation of the task's data.
+func (task *Task) Hash() ID <span class="cov1" title="1">{
+        hash := sha1.New()
+        _, _ = io.WriteString(hash, task.Func.Name)
+        _, _ = io.WriteString(hash, fmt.Sprintf("%+v", task.Params))
+        _, _ = io.WriteString(hash, fmt.Sprintf("%s", task.Schedule.Duration))
+        _, _ = io.WriteString(hash, fmt.Sprintf("%t", task.Schedule.IsRecurring))
+        return ID(fmt.Sprintf("%x", hash.Sum(nil)))
+}</span>
+
+func (task *Task) scheduleNextRun() <span class="cov8" title="3">{
+        if !task.IsRecurring </span><span class="cov5" title="2">{
+                return
+        }</span>
+
+        <span class="cov1" title="1">task.LastRun = task.NextRun
+        task.NextRun = task.NextRun.Add(task.Duration)</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
