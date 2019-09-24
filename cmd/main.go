@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
+
+	//flags "github.com/jessevdk/go-flags"
 
 	h "github.com/schedulerapi/httpserver"
 	"github.com/schedulerapi/scheduler"
@@ -11,14 +14,15 @@ import (
 )
 
 func configureScheduleEndpoint(scheduler *scheduler.Scheduler) {
-
+	args := parse()
 	mux := http.NewServeMux()
 	mux.Handle("/", routingHTTPServer(scheduler))
+	serverPort := strconv.Itoa(args.Server.Port)
 	wsServer := &http.Server{
-		Addr:    ":" + "8888",
+		Addr:    ":" + serverPort,
 		Handler: mux,
 	}
-	fmt.Println("Scheduler API Service listening on port:8888")
+	fmt.Println("Scheduler API Service listening on port:" + serverPort)
 	err := wsServer.ListenAndServe()
 	if err != nil {
 		fmt.Println("could not start the scheduler api server", err)

@@ -5,4 +5,4 @@ COPY scheduleapi /scheduleapi
 
 EXPOSE 8888
 
-ENTRYPOINT ["/scheduleapi"]
+ENTRYPOINT ["/scheduleapi", "--server-port=8888", "--server-hostname=localhost"]

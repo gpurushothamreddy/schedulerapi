@@ -68,6 +68,13 @@
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
   version = "v2.2.2"
 
+[[projects]]
+  digest = "1:a2cff208d4759f6ba1b1cd228587b0a1869f95f22542ec9cd17fff64430113c7"
+  name = "github.com/jessevdk/go-flags"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c6ca198ec95c841fdb89fc0de7496fed11ab854e"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -76,6 +83,7 @@
     "github.com/google/uuid",
     "github.com/mattn/go-sqlite3",
     "github.com/stretchr/testify/mock",
+    "github.com/jessevdk/go-flags",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
