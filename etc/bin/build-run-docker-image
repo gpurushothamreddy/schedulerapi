@@ -1,4 +1,9 @@
 #!/bin/sh
+BINARY=$GOPATH/bin/scheduleapi
+CMDPATH=github.com/schedulerapi/cmd
+
+
+CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -o "$BINARY" "$CMDPATH"
 
 mkdir -p Dockertmp
 
